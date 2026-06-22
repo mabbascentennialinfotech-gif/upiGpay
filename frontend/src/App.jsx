@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./App.css";
 
+// ✅ Define your backend base URL
+const API_BASE_URL = "https://upigpay.onrender.com";
+
 function App() {
   const [paymentStatus, setPaymentStatus] = useState("idle");
   const [transactionId, setTransactionId] = useState("");
@@ -68,9 +71,9 @@ function App() {
     setError("");
 
     try {
-      // 1. Create order from backend
+      // ✅ Use API_BASE_URL instead of localhost:5000
       const { data: orderData } = await axios.post(
-        "http://localhost:5000/api/create-order",
+        `${API_BASE_URL}/api/create-order`,
         {
           amount: 1000, // ₹10
           currency: "INR",
@@ -103,8 +106,9 @@ function App() {
 
           // 4. Verify payment on backend
           try {
+            // ✅ Use API_BASE_URL for verification too
             const verifyResponse = await axios.post(
-              "http://localhost:5000/api/verify-payment",
+              `${API_BASE_URL}/api/verify-payment`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
