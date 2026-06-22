@@ -52,7 +52,7 @@ function App() {
 
     return () => {
       const scriptTag = document.querySelector(
-        'script[src="https://checkout.razorpay.com/v1/razorpay.js"]'
+        'script[src="https://checkout.razorpay.com/v1/razorpay.js"]',
       );
       if (scriptTag) {
         document.body.removeChild(scriptTag);
@@ -76,7 +76,7 @@ function App() {
         {
           amount: 1000,
           currency: "INR",
-        }
+        },
       );
 
       if (!orderData.success) {
@@ -85,19 +85,27 @@ function App() {
 
       setOrderId(orderData.orderId);
 
-      const paymentData = {
+      // ✅ Use standard Checkout instead of createPayment
+      const options = {
+        key: "rzp_test_T4lGicSBURlT2o",
         amount: orderData.amount,
-        method: "upi",
-        contact: "9123456780",
-        email: "test@example.com",
+        currency: orderData.currency,
         order_id: orderData.orderId,
-        "_[flow]": "intent",
-        upi_provider: "google_pay",
-      };
-
-      razorpayInstance
-        .createPayment(paymentData, { gpay: true })
-        .on("payment.success", async (response) => {
+        name: "Your Store",
+        description: "Test Transaction",
+        prefill: {
+          contact: "9123456780",
+          email: "test@example.com",
+        },
+        notes: {
+          method: "upi",
+          // ✅ These still work without Omnichannel
+          upi_provider: "google_pay",
+        },
+        theme: {
+          color: "#F37254",
+        },
+        handler: async (response) => {
           console.log("Payment success:", response);
 
           try {
@@ -107,14 +115,16 @@ function App() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-              }
+              },
             );
 
             if (verifyResponse.data.success) {
               setTransactionId(response.razorpay_payment_id);
               setPaymentStatus("success");
             } else {
-              throw new Error(verifyResponse.data.message || "Verification failed");
+              throw new Error(
+                verifyResponse.data.message || "Verification failed",
+              );
             }
           } catch (err) {
             console.error("Verification error:", err);
@@ -122,13 +132,18 @@ function App() {
             setPaymentStatus("failed");
           }
           setLoading(false);
-        })
-        .on("payment.error", (error) => {
-          console.error("Payment error:", error);
-          setError(error.error?.description || "Payment failed");
-          setPaymentStatus("failed");
-          setLoading(false);
-        });
+        },
+        modal: {
+          ondismiss: () => {
+            setError("Payment cancelled");
+            setPaymentStatus("failed");
+            setLoading(false);
+          },
+        },
+      };
+
+      const razorpayCheckout = new window.Razorpay(options);
+      razorpayCheckout.open();
     } catch (err) {
       console.error("Payment initiation error:", err);
       setError(err.message || "Payment initiation failed");
@@ -142,8 +157,22 @@ function App() {
     <div className="success-container">
       <div className="success-image">
         <svg viewBox="0 0 100 100" className="checkmark">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="#4CAF50" strokeWidth="5" />
-          <path d="M35 50 L45 60 L65 40" fill="none" stroke="#4CAF50" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle
+            cx="50"
+            cy="50"
+            r="45"
+            fill="none"
+            stroke="#4CAF50"
+            strokeWidth="5"
+          />
+          <path
+            d="M35 50 L45 60 L65 40"
+            fill="none"
+            stroke="#4CAF50"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
       <h2>Payment Successful!</h2>
@@ -180,7 +209,9 @@ function App() {
     <div className="failure-container">
       <div className="failure-icon">✗</div>
       <h2>Payment Failed</h2>
-      <p className="error-message">{error || "An error occurred during payment"}</p>
+      <p className="error-message">
+        {error || "An error occurred during payment"}
+      </p>
       <button className="reset-button" onClick={() => setPaymentStatus("idle")}>
         Try Again
       </button>
@@ -203,12 +234,20 @@ function App() {
       </div>
 
       {/* ✅ Button always shows now */}
-      <button className="gpay-button" onClick={handleGpayPayment} disabled={loading}>
+      <button
+        className="gpay-button"
+        onClick={handleGpayPayment}
+        disabled={loading}
+      >
         {loading ? (
           "Processing..."
         ) : (
           <>
-            <img src="https://pay.google.com/gp/p/gp_g.svg" alt="GPay" className="gpay-logo" />
+            <img
+              src="https://pay.google.com/gp/p/gp_g.svg"
+              alt="GPay"
+              className="gpay-logo"
+            />
             Pay with Google Pay
           </>
         )}
