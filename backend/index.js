@@ -1,19 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const Razorpay = require('razorpay');
 const crypto = require('crypto');
-
-// Initialize Express app
-const app = express(); // <-- This is what you were missing!
+const app = express();
 const PORT = 5000;
 
-// Middleware
-
-
-// / Define the allowed frontend origins
+// ✅ CORS configuration with both frontend URLs
 const allowedOrigins = [
-  'http://localhost:3000',  // For local development
-  'https://upigpay-1.onrender.com' // Your frontend's Render URL
+  'http://localhost:3000',
+  'https://upigpay.onrender.com',
+  'https://upigpay-1.onrender.com'
 ];
 
 app.use(cors({
@@ -23,147 +18,160 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('❌ Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Initialize Razorpay with your test keys
-const razorpay = new Razorpay({
-  key_id: 'rzp_test_T4lGicSBURlT2o', // Replace with your test key ID
-  key_secret: 'tn7lwLDUGYcb1T8KTCoHgQPT', // Replace with your test key secret
-});
-
-// In-memory storage for transactions
 const transactions = new Map();
 
-/**
- * POST /api/create-order
- * Creates a Razorpay order for GPay Omnichannel flow
- */
-app.post('/api/create-order', async (req, res) => {
-  try {
-    const { amount = 1000, currency = 'INR' } = req.body; // amount in paise (₹10 = 1000 paise)
+// Test merchant details
+const GOOGLE_MERCHANT_ID = '01234567890123456789';
 
-    const options = {
+app.post('/api/create-payment', async (req, res) => {
+  try {
+    const { amount, orderId } = req.body;
+
+    if (!amount || !orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount and Order ID are required'
+      });
+    }
+
+    const transactionId = `TXN_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+
+    const transaction = {
+      id: transactionId,
+      orderId: orderId,
       amount: amount,
-      currency: currency,
-      receipt: `receipt_${Date.now()}`,
+      currency: 'INR',
+      merchantId: GOOGLE_MERCHANT_ID,
+      status: 'PENDING',
+      timestamp: new Date().toISOString()
     };
 
-    const order = await razorpay.orders.create(options);
+    transactions.set(transactionId, transaction);
+
+    console.log('💰 Payment Initiated:', transactionId);
+    console.log('   Amount:', amount);
+    console.log('   Order ID:', orderId);
 
     res.json({
       success: true,
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: 'rzp_test_T4lGicSBURlT2o', // Send to frontend
+      transactionId: transactionId,
+      merchantId: GOOGLE_MERCHANT_ID,
+      amount: amount,
+      currency: 'INR'
     });
+
   } catch (error) {
-    console.error('Order creation failed:', error);
+    console.error('Error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create order',
-      error: error.message,
+      message: 'Failed to create payment'
     });
   }
 });
 
-/**
- * POST /api/verify-payment
- * Verifies the payment signature from Razorpay
- */
-app.post('/api/verify-payment', (req, res) => {
+app.post('/api/verify-payment', async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { transactionId, paymentData } = req.body;
 
-    // Create a signature using your key_secret
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac('sha256', 'rzp_test_T4lGicSBURlT2o')
-      .update(body)
-      .digest('hex');
-
-    // Compare the signatures
-    const isValid = expectedSignature === razorpay_signature;
-
-    if (isValid) {
-      // Store transaction
-      const transaction = {
-        orderId: razorpay_order_id,
-        paymentId: razorpay_payment_id,
-        status: 'SUCCESS',
-        timestamp: new Date().toISOString(),
-      };
-      transactions.set(razorpay_order_id, transaction);
-
-      res.json({
-        success: true,
-        message: 'Payment verified successfully',
-        transaction: transaction,
-      });
-    } else {
-      res.status(400).json({
+    if (!transactionId) {
+      return res.status(400).json({
         success: false,
-        message: 'Invalid payment signature',
+        message: 'Transaction ID is required'
       });
     }
+
+    const transaction = transactions.get(transactionId);
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
+
+    // Simulate successful payment in sandbox
+    transaction.status = 'COMPLETED';
+    transaction.paymentData = paymentData || {};
+    transaction.completedAt = new Date().toISOString();
+    transaction.referenceId = `GP_${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+
+    transactions.set(transactionId, transaction);
+
+    console.log('✅ Payment Verified:', transactionId);
+    console.log('   Amount:', transaction.amount);
+    console.log('   Status:', transaction.status);
+
+    const receipt = {
+      transactionId: transaction.id,
+      orderId: transaction.orderId,
+      amount: transaction.amount,
+      currency: transaction.currency,
+      status: transaction.status,
+      referenceId: transaction.referenceId,
+      date: transaction.completedAt,
+      paymentMethod: 'Google Pay (Test Card)'
+    };
+
+    console.log('📋 Receipt:', JSON.stringify(receipt, null, 2));
+
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      receipt: receipt
+    });
+
   } catch (error) {
-    console.error('Payment verification failed:', error);
+    console.error('Verification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Payment verification failed',
-      error: error.message,
+      message: 'Payment verification failed'
     });
   }
 });
 
-/**
- * GET /api/transaction/:id
- * Get transaction details by order ID
- */
 app.get('/api/transaction/:id', (req, res) => {
-  const { id } = req.params;
-  const transaction = transactions.get(id);
+  const transaction = transactions.get(req.params.id);
 
   if (!transaction) {
     return res.status(404).json({
       success: false,
-      message: 'Transaction not found',
+      message: 'Transaction not found'
     });
   }
 
   res.json({
     success: true,
-    transaction: transaction,
+    transaction: transaction
   });
 });
 
-/**
- * GET /api/transactions
- * Get all transactions (for testing purposes)
- */
 app.get('/api/transactions', (req, res) => {
   const allTransactions = Array.from(transactions.values());
   res.json({
     success: true,
     count: allTransactions.length,
-    transactions: allTransactions,
+    transactions: allTransactions
   });
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`📋 Allowed Origins:`);
+  allowedOrigins.forEach(origin => console.log(`   - ${origin}`));
   console.log(`📋 Endpoints:`);
-  console.log(`   POST http://localhost:${PORT}/api/create-order - Create Razorpay order`);
-  console.log(`   POST http://localhost:${PORT}/api/verify-payment - Verify payment`);
-  console.log(`   GET  http://localhost:${PORT}/api/transaction/:id - Get transaction`);
-  console.log(`   GET  http://localhost:${PORT}/api/transactions - Get all transactions`);
+  console.log(`   POST /api/create-payment - Create payment`);
+  console.log(`   POST /api/verify-payment - Verify payment`);
+  console.log(`   GET  /api/transaction/:id - Get transaction`);
+  console.log(`   GET  /api/transactions - Get all transactions`);
 });
-
-// Export for testing
-module.exports = app;
