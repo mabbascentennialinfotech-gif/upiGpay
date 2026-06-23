@@ -1,196 +1,586 @@
-.app {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-    sans-serif;
   padding: 20px;
 }
 
-.payment-container,
-.success-container,
-.failure-container {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  max-width: 450px;
+.app {
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  max-width: 440px;
 }
 
-h1 {
-  color: #333;
-  font-size: 28px;
-  margin-bottom: 10px;
+/* Payment Container */
+.payment-container {
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 32px 28px 36px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
 }
 
-.payment-container p {
-  color: #666;
-  margin-bottom: 20px;
+.payment-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
 }
 
-.payment-details {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-}
-
-.detail-row {
+/* Header */
+.header {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.5px;
+}
+
+.badge {
+  background: #667eea;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+/* Amount Display */
+.amount-display {
+  background: #f8f9ff;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 28px;
+  border: 2px dashed #e8ecf4;
+}
+
+.currency {
+  font-size: 28px;
+  font-weight: 300;
+  color: #667eea;
+}
+
+.amount-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-left: 4px;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #555;
-}
-
-.detail-row .amount {
-  font-size: 24px;
-  font-weight: bold;
-  color: #2ecc71;
-}
-
-.gpay-button {
-  background: #ffffff;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 14px 40px;
-  border-radius: 25px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.3s;
   font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.form-label svg {
+  color: #667eea;
+}
+
+.input-field {
   width: 100%;
-  margin: 10px 0;
+  padding: 14px 18px;
+  border: 2px solid #e8ecf4;
+  border-radius: 14px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  outline: none;
+  background: #fafbff;
+  color: #1a1a2e;
+}
+
+.input-field:focus {
+  border-color: #667eea;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.input-field.disabled {
+  background: #f0f2f8;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.input-field::placeholder {
+  color: #bbb;
+}
+
+/* Google Pay Button */
+.gpay-button {
+  width: 100%;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 14px;
+  margin-top: 8px;
+  position: relative;
 }
 
 .gpay-button:hover:not(:disabled) {
-  background: #f5f5f5;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #f8f9ff;
+  border-color: #667eea;
   transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+}
+
+.gpay-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .gpay-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .gpay-logo {
-  height: 24px;
+  height: 28px;
   width: auto;
 }
 
-.test-info {
-  color: #999;
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #e8ecf4;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  color: #888;
+  font-size: 15px;
+  background: #f8f9ff;
+  border-radius: 14px;
+  margin-top: 8px;
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e74c3c;
+  background: #fef0ef;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-top: 16px;
   font-size: 14px;
-  margin-top: 15px;
-  background: #f0f0f0;
-  padding: 10px;
-  border-radius: 8px;
+  border: 1px solid #fdd0cd;
 }
 
-.success-container h2 {
-  color: #2ecc71;
-  margin: 20px 0 10px;
+.error-message svg {
+  flex-shrink: 0;
 }
 
-.success-image {
-  margin: 0 auto 20px;
-  width: 80px;
-  height: 80px;
+/* Test Info */
+.test-info {
+  margin-top: 24px;
+  padding: 18px 20px;
+  background: #f8f9ff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf4;
 }
 
-.checkmark {
-  width: 100%;
-  height: 100%;
-  animation: scaleIn 0.5s ease-out;
+.test-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
-@keyframes scaleIn {
+.test-icon {
+  font-size: 18px;
+}
+
+.test-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.test-info-list li {
+  padding: 4px 0;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.test-info-list li::before {
+  content: "•";
+  color: #667eea;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.code {
+  background: #e8ecf4;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: #1a1a2e;
+}
+
+/* Success Container */
+.success-container {
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 36px 28px 32px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.success-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+}
+
+.success-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.success-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: white;
+  font-weight: 300;
+  box-shadow: 0 8px 32px rgba(46, 204, 113, 0.3);
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
   0% {
     transform: scale(0);
-    opacity: 0;
   }
   100% {
     transform: scale(1);
-    opacity: 1;
   }
 }
 
-.receipt {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
-  text-align: left;
+.success-container h2 {
+  color: #1a1a2e;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.receipt h3 {
-  color: #333;
-  margin-bottom: 15px;
-  text-align: center;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 10px;
-}
-
-.receipt-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  color: #555;
+.success-subtitle {
+  color: #888;
   font-size: 14px;
+  margin-bottom: 24px;
 }
 
-.receipt-row .receipt-value {
-  color: #333;
-  font-weight: 500;
+/* Failure Container */
+.failure-container {
+  background: #ffffff;
+  border-radius: 32px;
+  padding: 36px 28px 32px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.success-text {
-  color: #2ecc71;
+.failure-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
 }
 
-.failure-container h2 {
-  color: #e74c3c;
-  margin: 20px 0 10px;
+.failure-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .failure-icon {
-  font-size: 60px;
-  color: #e74c3c;
-  margin-bottom: 20px;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  font-weight: 300;
+  box-shadow: 0 8px 32px rgba(231, 76, 60, 0.3);
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.error-message {
-  color: #e74c3c;
-  background: #fde8e8;
-  padding: 12px;
-  border-radius: 8px;
-  margin: 15px 0;
+.failure-container h2 {
+  color: #1a1a2e;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
+.failure-subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* Receipt */
+.receipt {
+  background: #f8f9ff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  text-align: left;
+  border: 1px solid #e8ecf4;
+}
+
+.receipt h3 {
+  color: #1a1a2e;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e8ecf4;
+  text-align: center;
+}
+
+.receipt-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.receipt-label {
+  color: #888;
+}
+
+.receipt-value {
+  color: #1a1a2e;
+  font-weight: 500;
+  word-break: break-all;
+  max-width: 55%;
+  text-align: right;
+}
+
+.amount-highlight {
+  font-size: 18px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.status-success {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+/* Reset Button */
 .reset-button {
-  background: #667eea;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 16px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .reset-button:hover {
-  background: #764ba2;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.35);
+}
+
+.reset-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .payment-container,
+  .success-container,
+  .failure-container {
+    padding: 24px 18px 28px;
+    border-radius: 24px;
+  }
+
+  .logo h1 {
+    font-size: 18px;
+  }
+
+  .amount-value {
+    font-size: 36px;
+  }
+
+  .currency {
+    font-size: 22px;
+  }
+
+  .gpay-button {
+    font-size: 16px;
+    padding: 14px 20px;
+  }
+
+  .receipt {
+    padding: 16px 18px;
+  }
+
+  .receipt-item {
+    font-size: 13px;
+  }
+
+  .receipt-value {
+    max-width: 60%;
+  }
+}
+
+/* Auto-redirect Section */
+.auto-redirect {
+  margin: 20px 0 24px;
+  padding: 16px 20px;
+  background: #f0f4ff;
+  border-radius: 14px;
+  border: 1px solid #dce3f5;
+}
+
+.auto-redirect p {
+  color: #444;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.auto-redirect strong {
+  color: #667eea;
+  font-size: 18px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e7f5;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+/* Home page icon adjustments */
+.logo svg {
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .auto-redirect {
+    padding: 12px 16px;
+  }
+
+  .auto-redirect p {
+    font-size: 13px;
+  }
+
+  .auto-redirect strong {
+    font-size: 16px;
+  }
 }
