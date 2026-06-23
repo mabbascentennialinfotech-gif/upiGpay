@@ -7,7 +7,6 @@ const PORT = 5000;
 // ✅ CORS configuration with both frontend URLs
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://upigpay.onrender.com',
   'https://upigpay-1.onrender.com'
 ];
 
